@@ -12,9 +12,9 @@ from db_api import quick_commands as commands
 async def get_start(message: Message, bot: Bot):
     await bot.send_photo(chat_id=message.from_user.id,
                          photo=FSInputFile('media/kolobok.jpg'),
-                         caption=emoji.emojize("Привет! Сегодня ты узнаешь много <b><s>АХУЕННЫХ</s></b> "
+                         caption=emoji.emojize("Привет! Сегодня ты узнаешь много "
                                                "хороших анекдотов :rolling_on_the_floor_laughing:\n\n"
-                                               "<b><s>РАСЧЕХЛЯЙ СВОЙ ПИВАС</s></b> Выбирай категорию и наслождайся!"),
+                                               "Выбирай категорию и наслождайся!"),
                          has_spoiler=True,
                          reply_markup=get_start_keyboard())
     try:
@@ -24,7 +24,7 @@ async def get_start(message: Message, bot: Bot):
 
 
 async def get_help(message: Message, bot: Bot):
-    msg = await bot.send_message(chat_id=message.from_user.id, text=emoji.emojize("<b><s>КОЖАННЫЙ УБЛЮДОК</s></b> никакой помощи не будет :middle_finger:"))
+    msg = await bot.send_message(chat_id=message.from_user.id, text=emoji.emojize("никакой помощи нет :middle_finger:"))
     await message.delete()
     await asyncio.sleep(2)
     try:
