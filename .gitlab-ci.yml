@@ -1,0 +1,42 @@
+stages:
+  - lint
+  - build
+  - staging
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+# Шаг линтинга
+lint:
+  stage: lint
+  image: python:3.8-slim  # Используем официальный образ Python
+  script:
+    - pip install flake8  # Устанавливаем линтер flake8
+    - flake8 .  # Запускаем линтер на всех файлах проекта
+  tags:
+    - docker
+
+# Шаг сборки Docker-образа
+build:
+  stage: build
+  image: docker:stable
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  script:
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}_python.${CI_PIPELINE_ID} .
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}_python.${CI_PIPELINE_ID}
+  tags:
+    - docker
+
+staging:
+  stage: staging
+  image: alpine:latest
+  before_script:
+    - apk update && apk add --no-cache openssh sshpass
+  script:
+    - sshpass -p 12345 ssh -o StrictHostKeyChecking=no ubuntu@192.168.31.25 "docker stop app || true && docker rm app || true && docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY} || true && docker run -d --net=appnet -p 8080:80 --name=app ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}_python.${CI_PIPELINE_ID} python3 app.py"
+  tags:
+    - docker
