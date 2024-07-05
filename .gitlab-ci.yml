@@ -7,17 +7,15 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
 
-# Шаг линтинга
 lint:
   stage: lint
-  image: python:3.8-slim  # Используем официальный образ Python
+  image: python:3.8-slim
   script:
-    - pip install flake8  # Устанавливаем линтер flake8
-    - flake8 .  # Запускаем линтер на всех файлах проекта
+    - pip install flake8
+    - flake8 .
   tags:
     - docker
 
-# Шаг сборки Docker-образа
 build:
   stage: build
   image: docker:stable
